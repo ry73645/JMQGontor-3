@@ -1,0 +1,83 @@
+{
+  "project": {
+    "name": "BJPJMQ",
+    "expanded_name": "Buat Jadwal Petugas Jam'iyyatul Qurra'",
+    "context": "Hybrid full-stack administration app preview in React JavaScript, later deployable as Google Apps Script HTML5/Vanilla JS",
+    "theme": "dark green glassroom",
+    "audience": ["jamiyyah administrators", "schedule coordinators", "staff supervisors"],
+    "success_actions": ["create and publish a conflict-free weekly schedule", "quickly locate staff or task assignments", "print or share the schedule", "audit changes with confidence"]
+  },
+  "design_direction": {
+    "emotional_tone": ["amanah", "calm authority", "premium professionalism", "quiet Islamic warmth"],
+    "fusion_references": ["Islamic geometric rhythm", "operations control-room precision", "dark glass architecture", "editorial Swiss information hierarchy"],
+    "theme_decision": "Dark theme is primary because it supports the requested premium green glassroom mood and reduces glare during evening administration. Keep surfaces solid or high-opacity glass; never use a fully transparent content surface.",
+    "designs": [
+      {"name": "Emerald Command Room", "probability": 0.34, "description": "Dense operational dashboard with a restrained glass sidebar, luminous green status signals, and a schedule matrix as the visual anchor."},
+      {"name": "Minaret Ledger", "probability": 0.24, "description": "Editorial administration layout using vertical rules, gold dividers, and serif-flavored section labels to make records feel trustworthy and ceremonial."},
+      {"name": "Night Garden", "probability": 0.18, "description": "Softer glass surfaces, botanical-inspired data marks, and generous negative space for a calm coordinator experience."},
+      {"name": "Mosaic Operations", "probability": 0.14, "description": "Asymmetric high-density bento dashboard with geometric cell framing and compact workflow panels."},
+      {"name": "Archive Greenroom", "probability": 0.10, "description": "Cardless archive-first interface emphasizing logs, filters, print readiness, and durable spreadsheet-era clarity."}
+    ],
+    "chosen_direction": "Emerald Command Room with Minaret Ledger details: operational clarity first, cultural warmth through rhythm and gold accents rather than decorative motifs. Do not copy the supplied reference literally."
+  },
+  "research": {
+    "references": [
+      {"source": "Godly/Recent design index", "url": "https://godly.website/", "descriptors": ["quiet achromatic frame", "content-first composition", "masonry-like varied density", "functional chromatic accents used sparingly"]},
+      {"source": "Aura UI", "url": "https://aura-ui.com/filament", "descriptors": ["sidebar-first admin architecture", "nature green preset", "glass preset", "CSS token-driven theming"]},
+      {"source": "Mobile dashboard guidance", "url": "https://www.toptal.com/designers/dashboard-design/mobile-dashboard-ui", "descriptors": ["prioritize mobile information", "avoid shrinking tables", "use explicit touch actions", "preserve navigation state"]},
+      {"source": "Scheduling table patterns", "url": "https://www.shadcn.io/blocks/tables-scheduling", "descriptors": ["conflict highlighting", "touch-friendly schedule cells", "horizontal scroll affordance", "filter controls around dense data"]}
+    ]
+  },
+  "typography": {
+    "heading": {"family": "Manrope", "weights": [600, 700, 800], "usage": "dashboard titles, navigation groups, modal titles", "classes": "font-sans tracking-tight"},
+    "body": {"family": "IBM Plex Sans", "weights": [400, 500, 600], "usage": "tables, forms, labels, descriptions", "classes": "font-sans leading-relaxed"},
+    "numeric": {"family": "IBM Plex Mono", "usage": "clock, IDs, counts, timestamps", "classes": "font-mono tabular-nums"},
+    "rules": ["Do not use Inter for headings; if Inter is retained for compatibility, use it only for body fallback.", "H1 max text-4xl sm:text-5xl lg:text-6xl; H2 max text-2xl sm:text-3xl lg:text-4xl.", "Overlines are uppercase text-xs with tracking-[0.2em].", "Use font-[850] for key dashboard numbers sparingly; never make every heading bold."]
+  },
+  "colors": {
+    "brand": {"forest": "#063B2A", "green": "#087A45", "signal": "#13A05B", "gold": "#F4C542", "gold_soft": "#FFE58A", "white": "#FFFFFF"},
+    "tinted_neutrals": {"ink": "#071A15", "deep_surface": "#0A261D", "surface": "#10382B", "raised": "#164A37", "muted_text": "#B7CFC4", "line": "#2B6650"},
+    "semantic": {"success": "#35C878", "warning": "#F4C542", "danger": "#F07062", "info": "#8BC9FF"},
+    "rules": ["#063B2A anchors the application; reserve #13A05B for primary CTAs and active states.", "Use gold only for attention, dates, key totals, and print/share affordances.", "All normal text must meet at least 4.5:1 contrast; large text and controls at least 3:1.", "Never use pure #000000 or #808080. Never use a full-screen gradient; texture and layered solids create depth."]
+  },
+  "layouts": {
+    "desktop": "Fixed 272px sidebar plus main workspace; top header is sticky, opaque high-opacity glass with z-50 and a bottom border.",
+    "tablet": "Collapse sidebar to a 76px icon rail, preserve labels in tooltips, and keep the schedule matrix horizontally scrollable.",
+    "mobile": "Sidebar becomes a Shadcn Sheet/Drawer. Header keeps brand, menu, connection status, and primary action. Use stacked metric rows and horizontal schedule scrolling with a visible fade/scroll hint.",
+    "dashboard_grid": "Use grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 or gap-6 for high-density dashboard. Primary schedule/chart spans 2 columns and active users/log feed spans 1 column.",
+    "schedule_matrix": "Use a cardless bordered matrix. Sticky first column, sticky header where feasible, min-width for day/time cells, internal overflow-x-auto, 48px minimum touch targets, clear assigned/empty/conflict states.",
+    "spacing": "Use p-6 to p-8 inside bordered surfaces, gap-6 between dashboard regions, and py-12 to py-20 between major sections. Avoid centered app containers and centered body text."
+  },
+  "components": [
+    {"name": "AppShell", "component_path": "src/App.js", "instructions": "Own sidebar, responsive drawer, sticky top bar, route/page state, and global loading/toast regions."},
+    {"name": "GlassSidebar", "component_path": "src/components/GlassSidebar.js", "instructions": "Solid high-opacity forest surface, active rail, visible desktop links, mobile Drawer on small screens."},
+    {"name": "DashboardStat", "component_path": "src/components/DashboardStat.js", "instructions": "Flat bordered tile with one metric, context label, trend, and semantic icon; no excessive shadow."},
+    {"name": "ScheduleMatrix", "component_path": "src/components/ScheduleMatrix.js", "instructions": "Direct grid/table children, conflict states, search/filter, print, WhatsApp/native share, and schedule-cell edit trigger."},
+    {"name": "ScheduleDialog", "component_path": "src/components/ScheduleDialog.js", "instructions": "Use Shadcn Dialog, Form, Input, Select, Calendar and validation; never native select/date inputs."},
+    {"name": "StaffManager", "component_path": "src/components/StaffManager.js", "instructions": "Search, status filter, CRUD dialog, empty/error/loading states, and confirmation toast."},
+    {"name": "ActivityLog", "component_path": "src/components/ActivityLog.js", "instructions": "Dense searchable audit list with timestamp in IBM Plex Mono and semantic event markers."},
+    {"name": "ConnectionStatus", "component_path": "src/components/ConnectionStatus.js", "instructions": "Show Apps Script readiness, last sync, and retry state; distinguish mocked preview from live integration."}
+  ],
+  "visual_enhancers": {
+    "glass": "Use bg-[#10382B]/90 backdrop-blur-xl backdrop-saturate-150 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.24)]. Do not use complete transparent backgrounds.",
+    "texture": "Add a subtle CSS noise/grain overlay at low opacity with pointer-events-none and aria-hidden=true; keep content readable.",
+    "geometry": "Use thin inset rules inspired by Islamic geometric repetition, but keep them abstract and functional rather than ornamental.",
+    "scrollbar": "Customize to a narrow forest track with green thumb; no layout gutter.",
+    "icons": "Use lucide-react or inline SVG; never use emoji as icons."
+  },
+  "motion": {
+    "entrance": "Stagger dashboard regions by 40ms with opacity and translate-y only.",
+    "interaction": "Buttons use transition-colors and transform separately, hover lift 1px, active scale-[0.98], and explicit hover text colors.",
+    "loading": "Use skeleton shimmer or pulsing status dot; never block the whole interface for auto-refresh.",
+    "refresh": "Poll data without overwriting an open modal or unsaved form; show a small last-synced transition.",
+    "reduced_motion": "Wrap nonessential animation in prefers-reduced-motion media query and disable transforms for reduced-motion users."
+  },
+  "accessibility": {
+    "requirements": ["All buttons, links, inputs, menus, dialogs, key metrics, schedule cells, connection status, toasts, and errors require data-testid in kebab-case.", "Keyboard focus uses a high-contrast 2px ring in #FFE58A or #8BC9FF.", "Use aria-label for icon-only buttons, aria-live for toast/status updates, and semantic table headers.", "Do not rely on color alone for assigned, empty, conflict, or connection states; include text/icon/pattern cues.", "Touch targets are at least 44px."]
+  },
+  "media": {"policy": "No external images are required or allowed for critical UI. Use CSS texture, inline SVG, and icons. Never use placeholder image URLs.", "image_urls": []},
+  "3d_libraries": {"decision": "No 3D. This is a data-heavy administration app where clarity and low-cost Apps Script deployment beat immersion.", "libraries": [], "steps": ["Keep charts SVG/CSS or lightweight Recharts if already installed.", "Avoid canvas/WebGL dependencies in the Apps Script delivery build."]},
+  "apps_script_data_model": {"sheets": ["Settings", "Staff", "TaskTypes", "Schedules", "ActivityLog"], "api_boundary": "Keep a service adapter so preview uses mocked local data while delivery maps methods to google.script.run.", "methods": ["getDashboardData", "listStaff", "saveStaff", "deleteStaff", "listTaskTypes", "saveTaskType", "getSchedules", "saveSchedule", "deleteSchedule", "rollSchedule", "getActivityLog", "getSettings", "saveSettings"], "mock_status": "MOCKED in React preview until google.script.run is connected; clearly label connection state in the UI."},
+  "general_ui_ux_design_guidelines": ["Do not use generic centered layouts, simplistic gradients, or uniform card styling.", "Use layered depth, generous spacing, crisp tinted borders, and purposeful asymmetry.", "Use Shadcn primitives for dialogs, drawers, dropdowns, calendar, forms, tables, and sonner toasts; customize them to the greenroom system.", "Never use transition: all.", "Use mobile-first responsive JavaScript components and preserve state when navigation changes.", "Use explicit error, empty, loading, and success states for every CRUD flow.", "Use print CSS to remove navigation/chrome and make the matrix legible on paper.", "For WhatsApp/share, use navigator.share when available and a wa.me fallback; report unsupported states with a toast.", "Use Google Apps Script integration only behind an adapter; do not assume google.script.run exists in local preview."],
+  "instructions_to_main_agent": {"file_format": "Implement in .js/.jsx files, not .tsx.", "priority_order": ["functional schedule CRUD and matrix", "responsive shell/navigation", "clear data states and validation", "dashboard hierarchy", "print/share and auto-refresh", "visual polish"], "existing_scaffold": ["Tailwind tokens are in /app/frontend/tailwind.config.js", "global tokens are in /app/frontend/src/index.css", "Shadcn primitives are in /app/frontend/src/components/ui/", "replace starter App.css rules rather than retaining centered starter styling"], "quality_gate": ["No transparent content surfaces", "No emoji icons", "Every interactive/key informational element has data-testid", "No modal is overwritten by refresh", "Schedule remains usable on mobile via internal horizontal scrolling", "All mocked integrations are labeled MOCKED"]}
+}
