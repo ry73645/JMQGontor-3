@@ -23,11 +23,11 @@
   function seed(){
     const t = now();
     const petugas = [
-      ['Bayu Abiliansyah'],['Fadgham Qoil Haq'],['Muhammad Roja'],['Faizuddin Akbar'],
-      ['Ust Zidane Az. Y'],['Ust Alannawa'],['Ust Abdul Ghofur'],['Ust Ismail Afdzalurrahman'],
-      ['Azzam Saefullah'],['Nufal Dhiyauulhaq'],['Ahmad Hazami Fachry'],['Brilliant'],
-      ['Ilham Jabbar'],['Fath Mahardika'],['Areyga'],['Hazwan Ghaisan']
-    ].map((r,i)=>({ID:'PJ'+String(i+1).padStart(3,'0'),NAMA:r[0],STATUS:'Aktif',KETERANGAN:'',CREATED_AT:t,UPDATED_AT:t}));
+      ['Bayu Abiliansyah','6281234567801'],['Fadgham Qoil Haq','6281234567802'],['Muhammad Roja','6281234567803'],['Faizuddin Akbar','6281234567804'],
+      ['Ust Zidane Az. Y',''],['Ust Alannawa',''],['Ust Abdul Ghofur',''],['Ust Ismail Afdzalurrahman',''],
+      ['Azzam Saefullah',''],['Nufal Dhiyauulhaq',''],['Ahmad Hazami Fachry',''],['Brilliant',''],
+      ['Ilham Jabbar',''],['Fath Mahardika',''],['Areyga',''],['Hazwan Ghaisan','']
+    ].map((r,i)=>({ID:'PJ'+String(i+1).padStart(3,'0'),NAMA:r[0],STATUS:'Aktif',KETERANGAN:'',NO_WA:r[1],CREATED_AT:t,UPDATED_AT:t}));
 
     const jenisTugas = [
       {ID:'JT001',NAMA_TUGAS:'Mujawwadah',URUTAN:1,STATUS:'Aktif',CREATED_AT:t,UPDATED_AT:t},
@@ -106,14 +106,14 @@
     addPetugas: function(p){
       const d = load(); const nama=(p.NAMA||'').trim(); if(!nama) return fail('Nama wajib diisi');
       const id = nextId('PJ',d.petugas); const t=now();
-      d.petugas.push({ID:id,NAMA:nama,STATUS:p.STATUS||'Aktif',KETERANGAN:p.KETERANGAN||'',CREATED_AT:t,UPDATED_AT:t});
+      d.petugas.push({ID:id,NAMA:nama,STATUS:p.STATUS||'Aktif',KETERANGAN:p.KETERANGAN||'',NO_WA:p.NO_WA||'',CREATED_AT:t,UPDATED_AT:t});
       writeLog(d,'ADD_PETUGAS','Menambah petugas: '+nama); save(d);
       return ok({ID:id},'Petugas berhasil ditambahkan');
     },
     updatePetugas: function(p){
       const d = load(); const idx = d.petugas.findIndex(x=>String(x.ID)===String(p.ID));
       if(idx<0) return fail('Petugas tidak ditemukan');
-      d.petugas[idx].NAMA=p.NAMA; d.petugas[idx].STATUS=p.STATUS||'Aktif'; d.petugas[idx].KETERANGAN=p.KETERANGAN||''; d.petugas[idx].UPDATED_AT=now();
+      d.petugas[idx].NAMA=p.NAMA; d.petugas[idx].STATUS=p.STATUS||'Aktif'; d.petugas[idx].KETERANGAN=p.KETERANGAN||''; d.petugas[idx].NO_WA=p.NO_WA||''; d.petugas[idx].UPDATED_AT=now();
       d.jadwal.forEach(j=>{ if(String(j.PETUGAS_ID)===String(p.ID)){ j.PETUGAS_NAMA=p.NAMA; } });
       writeLog(d,'EDIT_PETUGAS','Mengedit petugas: '+p.NAMA); save(d);
       return ok(null,'Petugas berhasil diperbarui');
@@ -258,6 +258,46 @@
       d.arsip.splice(idx,1);
       writeLog(d,'DELETE_ARSIP','Menghapus arsip: '+periode); save(d);
       return ok(null,'Arsip dihapus');
+    },
+    restoreArsip: function(p){
+      const d = load(); d.arsip = d.arsip || [];
+      const a = d.arsip.find(x=>String(x.ID)===String(p.ID));
+      if(!a) return fail('Arsip tidak ditemukan');
+      const snap = (a.DATA && a.DATA.jadwal) || [];
+      if(!snap.length) return fail('Snapshot kosong');
+      if(p.autoSnapshot){
+        const jadwalAktif = d.jadwal.filter(j=>j.STATUS==='Aktif');
+        const id2 = nextId('AR', d.arsip);
+        d.arsip.push({ID:id2, PERIODE:'Auto sebelum restore', TIMESTAMP:now(), JUMLAH_JADWAL:jadwalAktif.length, DESKRIPSI:'Otomatis dibuat sebelum restore dari '+a.PERIODE, DATA:{jadwal:jadwalAktif, jenisTugas:d.jenisTugas}});
+      }
+      const t = now();
+      d.jadwal = snap.map(function(j,i){
+        return {ID:'J'+String(i+1).padStart(3,'0'),HARI:j.HARI,WAKTU:j.WAKTU,JENIS_TUGAS:j.JENIS_TUGAS,PETUGAS_ID:j.PETUGAS_ID,PETUGAS_NAMA:j.PETUGAS_NAMA,STATUS:j.STATUS||'Aktif',HIGHLIGHT:String(j.HIGHLIGHT).toUpperCase()==='TRUE'?'TRUE':'FALSE',KETERANGAN:j.KETERANGAN||'',CREATED_AT:j.CREATED_AT||t,UPDATED_AT:t};
+      });
+      writeLog(d,'RESTORE_ARSIP','Restore dari: '+a.PERIODE+' ('+d.jadwal.length+' jadwal)'); save(d);
+      return ok({jumlah:d.jadwal.length}, 'Berhasil memulihkan '+d.jadwal.length+' jadwal dari "'+a.PERIODE+'"');
+    },
+    getStatistik: function(){
+      const d = load();
+      const jadwal = d.jadwal.filter(j=>j.STATUS==='Aktif');
+      const counts = {};
+      jadwal.forEach(j=>{
+        const id = String(j.PETUGAS_ID);
+        if(!counts[id]) counts[id] = {total:0, byWaktu:{}, byJenis:{}, byHari:{}};
+        counts[id].total++;
+        counts[id].byWaktu[j.WAKTU] = (counts[id].byWaktu[j.WAKTU]||0)+1;
+        counts[id].byJenis[j.JENIS_TUGAS] = (counts[id].byJenis[j.JENIS_TUGAS]||0)+1;
+        counts[id].byHari[j.HARI] = (counts[id].byHari[j.HARI]||0)+1;
+      });
+      const rows = d.petugas.map(p=>{
+        const c = counts[String(p.ID)] || {total:0,byWaktu:{},byJenis:{},byHari:{}};
+        return {ID:p.ID,NAMA:p.NAMA,STATUS:p.STATUS,total:c.total,byWaktu:c.byWaktu,byJenis:c.byJenis,byHari:c.byHari};
+      }).sort((a,b)=>b.total-a.total);
+      const active = rows.filter(r=>r.STATUS==='Aktif');
+      const max = active.length?active[0].total:0;
+      const min = active.length?active[active.length-1].total:0;
+      const avg = active.length?active.reduce((s,r)=>s+r.total,0)/active.length:0;
+      return ok({rows:rows,totalJadwal:jadwal.length,max:max,min:min,avg:Math.round(avg*10)/10,topName:active.length?active[0].NAMA:'-',bottomName:active.length?active[active.length-1].NAMA:'-'});
     }
   };
 

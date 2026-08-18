@@ -25,7 +25,7 @@ const SHEETS = {
 };
 
 const HEADERS = {
-  PETUGAS: ['ID', 'NAMA', 'STATUS', 'KETERANGAN', 'CREATED_AT', 'UPDATED_AT'],
+  PETUGAS: ['ID', 'NAMA', 'STATUS', 'KETERANGAN', 'CREATED_AT', 'UPDATED_AT', 'NO_WA'],
   JADWAL: ['ID', 'HARI', 'WAKTU', 'JENIS_TUGAS', 'PETUGAS_ID', 'PETUGAS_NAMA', 'STATUS', 'HIGHLIGHT', 'KETERANGAN', 'CREATED_AT', 'UPDATED_AT'],
   JENIS_TUGAS: ['ID', 'NAMA_TUGAS', 'URUTAN', 'STATUS', 'CREATED_AT', 'UPDATED_AT'],
   PENGATURAN: ['KEY', 'VALUE'],
@@ -90,13 +90,24 @@ function createRequiredSheets() {
     }
     // Ensure header
     const hdr = HEADERS[name];
-    const firstRow = sheet.getRange(1, 1, 1, hdr.length).getValues()[0];
+    const curWidth = Math.max(sheet.getLastColumn(), 1);
+    const firstRow = sheet.getRange(1, 1, 1, Math.max(curWidth, hdr.length)).getValues()[0];
     const needsHeader = firstRow.every(function (v) { return !v; });
     if (needsHeader) {
       sheet.getRange(1, 1, 1, hdr.length).setValues([hdr]);
       sheet.getRange(1, 1, 1, hdr.length)
         .setFontWeight('bold').setBackground('#063B2A').setFontColor('#FFFFFF');
       sheet.setFrozenRows(1);
+    } else {
+      // Extend header with new columns (backward-compat)
+      const existing = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
+      const missing = hdr.filter(function (h) { return existing.indexOf(h) < 0; });
+      if (missing.length) {
+        const startCol = sheet.getLastColumn() + 1;
+        sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
+        sheet.getRange(1, startCol, 1, missing.length)
+          .setFontWeight('bold').setBackground('#063B2A').setFontColor('#FFFFFF');
+      }
     }
   });
 }
@@ -261,12 +272,14 @@ function addPetugas(payload) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
+    createRequiredSheets();
     const sheet = getSheet(SHEETS.PETUGAS);
     const nama = sanitizeInput(payload.NAMA);
     if (!nama) return respondFail('Nama petugas wajib diisi');
     const id = generateId('PJ', sheet);
     const now = getCurrentTimestamp();
-    sheet.appendRow([id, nama, payload.STATUS || 'Aktif', sanitizeInput(payload.KETERANGAN || ''), now, now]);
+    const noWa = sanitizeInput(payload.NO_WA || '');
+    sheet.appendRow([id, nama, payload.STATUS || 'Aktif', sanitizeInput(payload.KETERANGAN || ''), now, now, noWa]);
     writeLog('ADD_PETUGAS', 'Menambah petugas: ' + nama);
     return respondOk({ ID: id }, 'Petugas berhasil ditambahkan');
   } catch (err) { return handleError('addPetugas', err); }
@@ -277,21 +290,28 @@ function updatePetugas(payload) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
+    createRequiredSheets();
     const sheet = getSheet(SHEETS.PETUGAS);
     const row = findRowById(sheet, payload.ID);
     if (row < 0) return respondFail('Petugas tidak ditemukan');
     const now = getCurrentTimestamp();
     const nama = sanitizeInput(payload.NAMA);
-    sheet.getRange(row, 2).setValue(nama);
-    sheet.getRange(row, 3).setValue(payload.STATUS || 'Aktif');
-    sheet.getRange(row, 4).setValue(sanitizeInput(payload.KETERANGAN || ''));
-    sheet.getRange(row, 6).setValue(now);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
+    const setCol = function (colName, value) {
+      const idx = headers.indexOf(colName);
+      if (idx >= 0) sheet.getRange(row, idx + 1).setValue(value);
+    };
+    setCol('NAMA', nama);
+    setCol('STATUS', payload.STATUS || 'Aktif');
+    setCol('KETERANGAN', sanitizeInput(payload.KETERANGAN || ''));
+    setCol('NO_WA', sanitizeInput(payload.NO_WA || ''));
+    setCol('UPDATED_AT', now);
 
     // Sync PETUGAS_NAMA in JADWAL
     const jSheet = getSheet(SHEETS.JADWAL);
     const jLast = jSheet.getLastRow();
     if (jLast > 1) {
-      const range = jSheet.getRange(2, 5, jLast - 1, 2); // PETUGAS_ID, PETUGAS_NAMA
+      const range = jSheet.getRange(2, 5, jLast - 1, 2);
       const vals = range.getValues();
       let changed = false;
       for (let i = 0; i < vals.length; i++) {
@@ -685,4 +705,83 @@ function deleteArsip(payload) {
     return respondOk(null, 'Arsip dihapus');
   } catch (err) { return handleError('deleteArsip', err); }
   finally { try { lock.releaseLock(); } catch (e) {} }
+}
+
+function restoreArsip(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    const arSheet = getSheet(SHEETS.ARSIP);
+    const row = findRowById(arSheet, payload.ID);
+    if (row < 0) return respondFail('Arsip tidak ditemukan');
+    const vals = arSheet.getRange(row, 1, 1, 6).getValues()[0];
+    let data = null;
+    try { data = JSON.parse(vals[5] || '{}'); } catch (e) { return respondFail('Data arsip rusak'); }
+    const snap = data.jadwal || [];
+    if (!snap.length) return respondFail('Snapshot kosong');
+
+    // Optionally auto-snapshot current before restore
+    if (payload.autoSnapshot) {
+      snapshotPeriode({ PERIODE: 'Auto sebelum restore', DESKRIPSI: 'Otomatis dibuat sebelum restore dari ' + vals[1] });
+    }
+
+    const jSheet = getSheet(SHEETS.JADWAL);
+    const jLast = jSheet.getLastRow();
+    if (jLast > 1) jSheet.getRange(2, 1, jLast - 1, jSheet.getLastColumn()).clearContent();
+
+    const now = getCurrentTimestamp();
+    const rows = snap.map(function (j, i) {
+      return [
+        'J' + String(i + 1).padStart(3, '0'),
+        j.HARI, j.WAKTU, j.JENIS_TUGAS,
+        j.PETUGAS_ID, j.PETUGAS_NAMA,
+        j.STATUS || 'Aktif',
+        String(j.HIGHLIGHT).toUpperCase() === 'TRUE' ? 'TRUE' : 'FALSE',
+        j.KETERANGAN || '',
+        j.CREATED_AT || now, now
+      ];
+    });
+    if (rows.length) jSheet.getRange(2, 1, rows.length, 11).setValues(rows);
+    writeLog('RESTORE_ARSIP', 'Restore jadwal dari arsip: ' + vals[1] + ' (' + rows.length + ' jadwal)');
+    return respondOk({ jumlah: rows.length }, 'Berhasil memulihkan ' + rows.length + ' jadwal dari "' + vals[1] + '"');
+  } catch (err) { return handleError('restoreArsip', err); }
+  finally { try { lock.releaseLock(); } catch (e) {} }
+}
+
+// ============ STATISTIK PETUGAS ============
+function getStatistik(payload) {
+  try {
+    const petugas = sheetToObjects(getSheet(SHEETS.PETUGAS));
+    const jadwal = sheetToObjects(getSheet(SHEETS.JADWAL))
+      .filter(function (j) { return j.STATUS === 'Aktif'; });
+    // count per petugas
+    const counts = {};
+    jadwal.forEach(function (j) {
+      const id = String(j.PETUGAS_ID);
+      if (!counts[id]) counts[id] = { total: 0, byWaktu: {}, byJenis: {}, byHari: {} };
+      counts[id].total++;
+      counts[id].byWaktu[j.WAKTU] = (counts[id].byWaktu[j.WAKTU] || 0) + 1;
+      counts[id].byJenis[j.JENIS_TUGAS] = (counts[id].byJenis[j.JENIS_TUGAS] || 0) + 1;
+      counts[id].byHari[j.HARI] = (counts[id].byHari[j.HARI] || 0) + 1;
+    });
+    const rows = petugas.map(function (p) {
+      const c = counts[String(p.ID)] || { total: 0, byWaktu: {}, byJenis: {}, byHari: {} };
+      return {
+        ID: p.ID, NAMA: p.NAMA, STATUS: p.STATUS,
+        total: c.total, byWaktu: c.byWaktu, byJenis: c.byJenis, byHari: c.byHari
+      };
+    }).sort(function (a, b) { return b.total - a.total; });
+
+    const active = rows.filter(function (r) { return r.STATUS === 'Aktif'; });
+    const max = active.length ? active[0].total : 0;
+    const min = active.length ? active[active.length - 1].total : 0;
+    const avg = active.length ? active.reduce(function (s, r) { return s + r.total; }, 0) / active.length : 0;
+
+    return respondOk({
+      rows: rows, totalJadwal: jadwal.length,
+      max: max, min: min, avg: Math.round(avg * 10) / 10,
+      topName: active.length ? active[0].NAMA : '-',
+      bottomName: active.length ? active[active.length - 1].NAMA : '-'
+    });
+  } catch (err) { return handleError('getStatistik', err); }
 }

@@ -79,13 +79,30 @@ Buka URL Web App di browser. Aplikasi akan otomatis:
 ### Menambah Petugas
 1. Klik menu **👤 Petugas** di sidebar
 2. Klik **+ Tambah Petugas**
-3. Isi nama, status, keterangan → **Simpan**
+3. Isi nama, status, **No. WhatsApp** (format 628…), keterangan → **Simpan**
+
+### Notifikasi WhatsApp Petugas (📱)
+1. Menu **📱 Notifikasi WA**
+2. Pilih hari (default: besok)
+3. Edit template pesan bila perlu (gunakan `{NAMA}`, `{HARI}`, `{TANGGAL}`, `{WAKTU}`, `{JENIS_TUGAS}`)
+4. Klik **📱 WA** per petugas untuk buka WhatsApp dengan pesan siap-kirim, atau **📋 Salin** untuk copy manual.
+5. Tanpa API berbayar — memakai `wa.me` deep link.
+
+### Statistik Petugas (📈)
+Menu **📈 Statistik**: papan skor bar-chart, siapa terbanyak/paling sedikit bertugas, rata-rata, filter urutan.
+
+### Arsip Periode & Restore
+- **📸 Simpan Snapshot** — bekukan jadwal saat ini
+- **♻ Pulihkan** — kembalikan jadwal aktif ke snapshot tersebut (otomatis membuat cadangan snapshot dulu)
+- **⚖ Bandingkan 2 Snapshot** — lihat perubahan side-by-side (hijau=tambah, merah=hapus, kuning=ubah)
+
+### Cetak PDF Cantik
+Menu **📅 Jadwal** → tombol **📄 Cetak PDF** menghasilkan lembar cetak dengan kop logo Gontor + tabel jadwal + blok tanda tangan 3 pengurus (bisa diisi di **⚙️ Pengaturan**).
 
 ### Menambah Jadwal
 1. Klik menu **📅 Jadwal**
 2. Klik cell **—** (kosong) di posisi Hari × Waktu × Jenis Tugas
 3. Pilih petugas, aktifkan **Highlight** bila perlu → **Simpan**
-4. Bila petugas sudah punya tugas di jam yang sama, sistem akan menampilkan konfirmasi konflik — Anda tetap bisa **Tetap Simpan**
 
 ### Edit / Hapus Jadwal
 Klik cell yang sudah berisi nama petugas → modal edit terbuka.
@@ -93,13 +110,22 @@ Klik cell yang sudah berisi nama petugas → modal edit terbuka.
 ### Rolling (Rotasi Petugas)
 1. Klik menu **🔄 Rolling**
 2. Pilih Hari, Waktu, Jenis Tugas
-3. Klik **🔄 Rolling** — petugas otomatis berpindah ke urutan berikutnya dari daftar petugas aktif.
+3. Klik **🔄 Rolling** — petugas berpindah ke urutan berikutnya.
 
-### Cetak Jadwal
-Menu **📅 Jadwal** → tombol **🖨 Cetak**. Print preview akan otomatis menyembunyikan sidebar & filter.
+### Kalender Bulanan (🗓)
+Grid Ahad–Sabtu satu bulan penuh, klik tanggal untuk auto-filter Jadwal ke hari itu.
+
+### Drag Reorder Jenis Tugas
+Menu **📋 Jenis Tugas** → tarik ikon `⋮⋮` di kolom Urutan untuk mengubah posisi.
+
+### Export CSV
+Menu **📅 Jadwal** → tombol **📥 CSV**, file `BJPJMQ_Jadwal_<PERIODE>.csv` langsung ter-download.
+
+### Cetak Jadwal Standar
+Menu **📅 Jadwal** → **🖨 Cetak Biasa** untuk print sederhana tanpa kop.
 
 ### Share via WhatsApp
-Menu **📅 Jadwal** → tombol **📱 Share WA**. Aplikasi akan generate teks jadwal & membuka WhatsApp share.
+Menu **📅 Jadwal** → **📱 Share WA** generate teks jadwal & buka WhatsApp share.
 
 ---
 

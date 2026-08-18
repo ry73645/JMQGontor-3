@@ -20,7 +20,12 @@ Membangun Web App **BJPJMQ** (Buat Jadwal Petugas Jam'iyyatul Qurra') berbasis *
 ## What's Implemented (Jan 2026)
 - Backend `Code.gs` lengkap: `doGet`, `getInitialData`, CRUD Petugas/Jadwal/Jenis Tugas, `updatePengaturan`, `rollingJadwal`, `validateJadwal`, `checkConflict`, `writeLog`, `initializeSpreadsheet`, `createRequiredSheets`, `LockService` untuk semua write.
 - Frontend `Index.html`: 9 halaman (Dashboard, Jadwal matrix, Kalender Bulanan, Petugas, Rolling, Jenis Tugas, Arsip Periode, Log, Pengaturan), modal jadwal/petugas/jenis/snapshot/confirm, toast, loading, responsive drawer sidebar, sticky headers, highlight cells, print CSS, WhatsApp share, jam realtime, auto-refresh 30 detik yang tidak mengganggu modal terbuka.
-- **Iterasi 2 (fitur baru)**:
+- **Iterasi 3 (fitur baru)**:
+  - **Restore Arsip (♻ Pulihkan)**: `restoreArsip({ID, autoSnapshot})` — replace JADWAL sheet dengan snapshot arsip, otomatis membuat snapshot cadangan sebelumnya.
+  - **PDF Cantik**: Template `#pdfTemplate` dengan kop logo Gontor + judul emas + tabel jadwal dengan highlight kuning + blok tanda tangan 3 pengurus (nama & jabatan configurable di Pengaturan). CSS `@media print` khusus.
+  - **Notifikasi WhatsApp**: Halaman baru `notifikasi` — pilih hari, template pesan editable dengan placeholder `{NAMA} {HARI} {TANGGAL} {WAKTU} {JENIS_TUGAS}`, per petugas tampil tombol **📱 WA** (buka wa.me link) + **📋 Salin**. Kolom NO_WA ditambahkan ke sheet PETUGAS (backward-compat via header-extension). Tombol **Salin Semua** untuk broadcast.
+  - **Statistik Petugas**: Halaman `statistik` — backend `getStatistik()` menghitung total tugas per petugas + breakdown by waktu/jenis/hari. UI: 4 KPI card (Terbanyak/Sedikit/Rata-rata/Total) + papan skor bar-chart dengan sort (desc/asc/name), highlight juara & bottom.
+- **Iterasi 2**:
   - **Export CSV**: Tombol 📥 CSV di halaman Jadwal, download client-side (Blob + BOM UTF-8) dengan nama `BJPJMQ_Jadwal_<PERIODE>.csv`.
   - **Drag & Drop Reorder Jenis Tugas**: HTML5 native drag-drop pada baris tabel; backend `reorderJenisTugas({orderedIds})` batch update kolom URUTAN.
   - **Kalender Bulanan**: Grid 7 kolom Ahad-Sabtu, navigasi prev/next bulan, tombol Hari Ini, cell menampilkan ringkasan 3 jadwal + "+N lainnya", klik cell auto-filter Jadwal ke hari terkait.
