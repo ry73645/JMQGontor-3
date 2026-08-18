@@ -302,6 +302,77 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
 .pdf-sign .col strong{border-top:1px solid #063B2A;padding-top:4px;display:inline-block;min-width:150px;font-size:12px;color:#000}
 .pdf-sign .col em{display:block;color:#666;font-size:10.5px;margin-top:2px;font-style:normal}
 .pdf-footer{margin-top:20px;padding-top:8px;border-top:1px solid #ddd;text-align:center;font-size:10px;color:#666}
+
+/* ===== Today Slots (Dashboard) ===== */
+.today-slots{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:1100px){.today-slots{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.today-slots{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.today-slots{grid-template-columns:1fr}}
+.slot-card{
+  position:relative; padding:14px; border-radius:14px;
+  background:rgba(0,0,0,.22); border:1px solid var(--glass-border);
+  display:flex; flex-direction:column; gap:8px; transition:.25s;
+  overflow:hidden;
+}
+.slot-card::before{
+  content:""; position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  background:radial-gradient(120% 120% at 0% 0%, rgba(244,197,66,.0), transparent 55%);
+  transition:.4s;
+}
+.slot-card:hover{transform:translateY(-2px);border-color:rgba(244,197,66,.4)}
+.slot-card .st-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.slot-card .st-time{font-size:16px;font-weight:800;letter-spacing:.04em;color:var(--gold);text-transform:uppercase}
+.slot-card .st-clock{font-size:11px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
+.slot-card .st-list{display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.slot-card .st-list div{display:flex;justify-content:space-between;gap:6px;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.04)}
+.slot-card .st-list div.hl{background:linear-gradient(135deg,rgba(244,197,66,.9),rgba(255,229,138,.9));color:#0a2416;font-weight:700}
+.slot-card .st-list div .role{font-size:10.5px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em}
+.slot-card .st-list div.hl .role{color:rgba(10,36,22,.7)}
+.slot-card .st-empty{color:rgba(255,255,255,.4);font-style:italic;font-size:12px}
+.slot-card .st-status{font-size:10.5px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);letter-spacing:.04em;text-transform:uppercase;font-weight:700}
+.slot-card.done{opacity:.55}
+.slot-card.done .st-status{background:rgba(255,255,255,.06)}
+.slot-card.current{border-color:var(--bright-green);background:linear-gradient(135deg,rgba(19,160,91,.22),rgba(0,0,0,.2))}
+.slot-card.current .st-status{background:rgba(19,160,91,.4);color:#c8f0d9}
+
+/* Alert glow when approaching prayer time */
+.slot-card.soon{
+  border-color:var(--gold);
+  background:linear-gradient(135deg,rgba(244,197,66,.14),rgba(0,0,0,.2));
+  animation:soonGlow 1.6s ease-in-out infinite;
+}
+.slot-card.soon::before{
+  background:radial-gradient(90% 90% at 50% 50%, rgba(244,197,66,.28), transparent 65%);
+}
+.slot-card.soon .st-status{background:var(--gold);color:#0a2416}
+@keyframes soonGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(244,197,66,.0), 0 8px 22px rgba(0,0,0,.35)}
+  50%{box-shadow:0 0 0 4px rgba(244,197,66,.25), 0 0 30px rgba(244,197,66,.45), 0 8px 22px rgba(0,0,0,.35)}
+}
+.slot-card.imminent{
+  animation:imminentGlow 1s ease-in-out infinite;
+  border-color:#FFE58A;
+}
+.slot-card.imminent::before{
+  background:radial-gradient(80% 80% at 50% 50%, rgba(255,229,138,.45), transparent 60%);
+}
+.slot-card.imminent .st-status{background:linear-gradient(135deg,#FFE58A,#F4C542);color:#0a2416}
+@keyframes imminentGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,229,138,.4), 0 8px 22px rgba(0,0,0,.35); transform:scale(1)}
+  50%{box-shadow:0 0 0 6px rgba(255,229,138,.15), 0 0 40px rgba(255,229,138,.7), 0 8px 22px rgba(0,0,0,.35); transform:scale(1.015)}
+}
+.countdown{font-size:11px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.soon .countdown{color:#0a2416}
+.imminent .countdown{color:#0a2416}
+
+/* Logo uploader */
+.logo-uploader{display:flex;align-items:center;gap:16px;padding:14px;border-radius:12px;background:rgba(0,0,0,.15);border:1px solid var(--glass-border);margin-bottom:14px}
+.logo-uploader .prev{width:74px;height:74px;border-radius:14px;object-fit:cover;background:#063B2A;box-shadow:0 4px 12px rgba(0,0,0,.4);flex-shrink:0}
+.logo-uploader .info{flex:1;min-width:0}
+.logo-uploader .info h4{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:2px}
+.logo-uploader .info p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.4}
+.logo-uploader .actions{display:flex;gap:8px;flex-wrap:wrap}
+.logo-uploader input[type=file]{display:none}
 </style>
 </head>
 <body>
@@ -351,6 +422,14 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
 
     <!-- =========== DASHBOARD =========== -->
     <div class="page active" id="page-dashboard">
+      <div class="card" style="margin-bottom:22px">
+        <div class="section-head">
+          <h2>Petugas Hari Ini <span id="todayHariBadge" style="font-size:13px;color:var(--light-yellow);font-weight:600;margin-left:8px"></span></h2>
+          <div class="toolbar"><span id="todayDate" style="font-size:12.5px;color:rgba(255,255,255,.7)"></span></div>
+        </div>
+        <div id="todaySlots" class="today-slots"></div>
+      </div>
+
       <div class="stats">
         <div class="card stat"><span class="ico">👥</span><h3>Total Petugas</h3><div class="num" id="stTotalPetugas">0</div><div class="foot"><span id="stPetugasAktif">0</span> aktif</div></div>
         <div class="card stat"><span class="ico">📅</span><h3>Total Jadwal</h3><div class="num" id="stTotalJadwal">0</div><div class="foot">semua entri</div></div>
@@ -590,13 +669,42 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
     <!-- =========== SETTINGS =========== -->
     <div class="page" id="page-settings">
       <div class="card">
-        <div class="section-head"><h2>Pengaturan Aplikasi</h2></div>
+        <div class="section-head"><h2>Profil Web App</h2></div>
+        <div class="logo-uploader">
+          <img id="logoPreview" class="prev" src="" alt="Logo"/>
+          <div class="info">
+            <h4>Logo Aplikasi</h4>
+            <p>Unggah gambar (PNG/JPG/WebP, maks ~300 KB). Logo akan tampil di sidebar dan lembar cetak PDF.</p>
+          </div>
+          <div class="actions">
+            <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp"/>
+            <button class="btn btn-primary btn-sm" id="btnUploadLogo" data-testid="upload-logo-btn">📤 Ganti Logo</button>
+            <button class="btn btn-ghost btn-sm" id="btnResetLogo">↺ Default</button>
+          </div>
+        </div>
         <div class="form-grid">
           <div><label>Nama Aplikasi</label><input id="sAppName"/></div>
           <div><label>Subjudul</label><input id="sSubtitle"/></div>
           <div><label>Periode</label><input id="sPeriode" placeholder="Contoh: 2026 / Agustus 2026"/></div>
           <div><label>Auto Refresh (detik)</label><input id="sRefresh" type="number" min="5"/></div>
-          <div class="full" style="border-top:1px solid var(--glass-border);padding-top:16px;margin-top:8px"><label style="font-size:14px;color:var(--gold)">Tanda Tangan PDF (opsional)</label></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="section-head"><h2>Waktu Sholat (untuk Notifikasi Cahaya Dashboard)</h2></div>
+        <p style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:12px">Kartu jadwal di dashboard akan menyala kuning saat kurang dari 30 menit menuju waktu sholat, dan berkedip terang saat kurang dari 10 menit.</p>
+        <div class="form-grid">
+          <div><label>Subuh</label><input id="sTimeSubuh" type="time"/></div>
+          <div><label>Dhuhur</label><input id="sTimeDhuhur" type="time"/></div>
+          <div><label>Ashar</label><input id="sTimeAshar" type="time"/></div>
+          <div><label>Maghrib</label><input id="sTimeMaghrib" type="time"/></div>
+          <div><label>Isya'</label><input id="sTimeIsya" type="time"/></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="section-head"><h2>Tanda Tangan PDF (Opsional)</h2></div>
+        <div class="form-grid">
           <div><label>Nama Pengurus 1</label><input id="sSign1Name" placeholder="Ketua Jam'iyyatul Qurra'"/></div>
           <div><label>Jabatan 1</label><input id="sSign1Role" placeholder="Ketua"/></div>
           <div><label>Nama Pengurus 2</label><input id="sSign2Name" placeholder="Sekretaris"/></div>
@@ -604,8 +712,9 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
           <div><label>Nama Pengurus 3</label><input id="sSign3Name" placeholder="Mengetahui, Pembina"/></div>
           <div><label>Jabatan 3</label><input id="sSign3Role" placeholder="Pembina"/></div>
         </div>
-        <div style="margin-top:16px"><button class="btn btn-primary" id="btnSaveSettings" data-testid="save-settings-btn">💾 Simpan Pengaturan</button></div>
       </div>
+
+      <div style="margin-top:16px"><button class="btn btn-primary" id="btnSaveSettings" data-testid="save-settings-btn">💾 Simpan Pengaturan</button></div>
     </div>
 
   </div>
@@ -707,8 +816,11 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
    Dual-mode: Google Apps Script (google.script.run) atau Browser Preview (window.MOCK_BACKEND).
 ================================================================ */
 
-const LOGO_URL = 'https://customer-assets-m6fa6gv7.emergentagent.net/job_96176cd3-0d64-41f4-9676-9fc274d21ea6/artifacts/9cblh30j_image.webp';
+const DEFAULT_LOGO_URL = 'https://customer-assets-m6fa6gv7.emergentagent.net/job_96176cd3-0d64-41f4-9676-9fc274d21ea6/artifacts/9cblh30j_image.webp';
+let LOGO_URL = DEFAULT_LOGO_URL;
 document.getElementById('brandLogo').src = LOGO_URL;
+
+const DEFAULT_PRAYER_TIMES = { Subuh:'04:30', Dhuhur:'12:00', Ashar:'15:15', Maghrib:'18:00', "Isya'":'19:15' };
 
 const STATE = {
   petugas: [], jadwal: [], jenisTugas: [], pengaturan: [], log: [],
@@ -818,7 +930,9 @@ function getSetting(key, def){
 
 /* ---------- Render All ---------- */
 function renderAll(){
+  applyLogoFromSetting();
   renderStats();
+  renderTodaySlots();
   renderRecentLog();
   fillWaktuDropdowns();
   fillHariDropdowns();
@@ -834,6 +948,84 @@ function renderAll(){
   el('stUpdate').textContent = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
   el('stUpdateDate').textContent = 'baru saja';
 }
+
+function applyLogoFromSetting(){
+  const custom = getSetting('APP_LOGO','');
+  LOGO_URL = custom || DEFAULT_LOGO_URL;
+  el('brandLogo').src = LOGO_URL;
+  const lp = el('logoPreview'); if(lp) lp.src = LOGO_URL;
+  // Also update app name
+  const nm = getSetting('APP_NAME','BJPJMQ');
+  const sub = getSetting('APP_SUBTITLE',"Buat Jadwal Petugas Jam'iyyatul Qurra'");
+  const b = document.querySelector('.brand-txt h1'); if(b) b.textContent = nm;
+  const s = document.querySelector('.brand-txt small'); if(s) s.innerHTML = escapeHtml(sub).replace(' ','<br/>');
+}
+
+function getPrayerTimes(){
+  return {
+    Subuh: getSetting('TIME_SUBUH', DEFAULT_PRAYER_TIMES.Subuh),
+    Dhuhur: getSetting('TIME_DHUHUR', DEFAULT_PRAYER_TIMES.Dhuhur),
+    Ashar: getSetting('TIME_ASHAR', DEFAULT_PRAYER_TIMES.Ashar),
+    Maghrib: getSetting('TIME_MAGHRIB', DEFAULT_PRAYER_TIMES.Maghrib),
+    "Isya'": getSetting('TIME_ISYA', DEFAULT_PRAYER_TIMES["Isya'"])
+  };
+}
+
+function parseHM(s){ if(!s) return null; const p=String(s).split(':'); return { h:parseInt(p[0],10)||0, m:parseInt(p[1],10)||0 }; }
+
+function renderTodaySlots(){
+  const now = new Date();
+  const dowNames = ['Ahad','Senin','Selasa','Rabu','Kamis',"Jum'at",'Sabtu'];
+  const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const hariNama = dowNames[now.getDay()];
+  el('todayHariBadge').textContent = '· '+hariNama;
+  el('todayDate').textContent = now.getDate()+' '+bulan[now.getMonth()]+' '+now.getFullYear();
+
+  const jenisSorted = (STATE.jenisTugas||[]).filter(function(j){return j.STATUS==='Aktif'}).sort(function(a,b){return (a.URUTAN||0)-(b.URUTAN||0)});
+  const times = getPrayerTimes();
+  const wrap = el('todaySlots');
+  wrap.innerHTML = STATE.waktuList.map(function(w){
+    const t = parseHM(times[w]);
+    const items = (STATE.jadwal||[]).filter(function(j){ return j.HARI===hariNama && j.WAKTU===w && j.STATUS==='Aktif'; });
+    // sort by jenis order
+    items.sort(function(a,b){
+      return jenisSorted.findIndex(function(x){return x.NAMA_TUGAS===a.JENIS_TUGAS})
+           - jenisSorted.findIndex(function(x){return x.NAMA_TUGAS===b.JENIS_TUGAS});
+    });
+    const listHtml = items.length
+      ? items.map(function(j){
+          const hl = String(j.HIGHLIGHT).toUpperCase()==='TRUE';
+          return '<div class="'+(hl?'hl':'')+'"><span class="role">'+escapeHtml(j.JENIS_TUGAS)+'</span> <span>'+escapeHtml(j.PETUGAS_NAMA||'-')+(hl?' ★':'')+'</span></div>';
+        }).join('')
+      : '<div class="st-empty">— tidak ada jadwal —</div>';
+    return '<div class="slot-card" data-waktu="'+escapeHtml(w)+'" data-hh="'+(t?t.h:'')+'" data-mm="'+(t?t.m:'')+'">'+
+      '<div class="st-head"><div class="st-time">'+w+'</div><div class="st-status">-</div></div>'+
+      '<div class="st-clock">🕌 '+(t? pad(t.h)+':'+pad(t.m) :'—')+' <span class="countdown" data-cd></span></div>'+
+      '<div class="st-list">'+listHtml+'</div>'+
+    '</div>';
+  }).join('');
+  updateSlotStatus();
+}
+
+function updateSlotStatus(){
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  document.querySelectorAll('#todaySlots .slot-card').forEach(function(card){
+    const hh = parseInt(card.dataset.hh,10), mm = parseInt(card.dataset.mm,10);
+    const st = card.querySelector('.st-status');
+    const cd = card.querySelector('[data-cd]');
+    card.classList.remove('soon','imminent','current','done');
+    if(isNaN(hh) || isNaN(mm)){ if(st) st.textContent='—'; if(cd) cd.textContent=''; return; }
+    const targetMin = hh*60 + mm;
+    const diff = targetMin - nowMin;
+    if(diff <= -60){ card.classList.add('done'); if(st) st.textContent='Selesai'; if(cd) cd.textContent=''; }
+    else if(diff <= 0 && diff > -60){ card.classList.add('current'); if(st) st.textContent='Sekarang'; if(cd) cd.textContent='+'+Math.abs(diff)+' menit'; }
+    else if(diff <= 10){ card.classList.add('imminent'); if(st) st.textContent='⚡ Segera!'; if(cd) cd.textContent='dalam '+diff+' menit'; }
+    else if(diff <= 30){ card.classList.add('soon'); if(st) st.textContent='Mendekati'; if(cd) cd.textContent='dalam '+diff+' menit'; }
+    else { if(st) st.textContent='Akan datang'; if(cd) cd.textContent='dalam '+Math.floor(diff/60)+'j '+(diff%60)+'m'; }
+  });
+}
+setInterval(updateSlotStatus, 30000);
 
 function renderStats(){
   const s = STATE.statistik || {};
@@ -1151,16 +1343,71 @@ function renderSettings(){
   el('sSign2Role').value = getSetting('SIGN2_ROLE','Sekretaris');
   el('sSign3Name').value = getSetting('SIGN3_NAME','');
   el('sSign3Role').value = getSetting('SIGN3_ROLE','Mengetahui');
+  el('sTimeSubuh').value = getSetting('TIME_SUBUH', DEFAULT_PRAYER_TIMES.Subuh);
+  el('sTimeDhuhur').value = getSetting('TIME_DHUHUR', DEFAULT_PRAYER_TIMES.Dhuhur);
+  el('sTimeAshar').value = getSetting('TIME_ASHAR', DEFAULT_PRAYER_TIMES.Ashar);
+  el('sTimeMaghrib').value = getSetting('TIME_MAGHRIB', DEFAULT_PRAYER_TIMES.Maghrib);
+  el('sTimeIsya').value = getSetting('TIME_ISYA', DEFAULT_PRAYER_TIMES["Isya'"]);
+  el('logoPreview').src = LOGO_URL;
 }
+
+let PENDING_LOGO = null;
+el('btnUploadLogo').onclick = function(){ el('logoFile').click(); };
+el('logoFile').addEventListener('change', function(e){
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  // Read then resize to max 200x200 JPEG to keep base64 under 30KB (Google Sheets cell limit ~50K chars)
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const MAX = 200;
+      const scale = Math.min(1, MAX/Math.max(img.width, img.height));
+      const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+      const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#063B2A'; ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img, 0, 0, w, h);
+      // Try progressive quality until <30KB
+      let quality = 0.85, dataUrl = '';
+      for(let i=0;i<6;i++){
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+        if(dataUrl.length < 30000) break;
+        quality -= 0.12;
+      }
+      if(dataUrl.length > 45000){ toast('Gambar terlalu besar. Coba yang lebih kecil.','err'); return; }
+      PENDING_LOGO = dataUrl;
+      el('logoPreview').src = PENDING_LOGO;
+      toast('Logo diproses ('+Math.round(dataUrl.length/1024)+' KB). Klik Simpan untuk menerapkan.');
+    };
+    img.onerror = function(){ toast('Gambar tidak valid','err'); };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(f);
+});
+el('btnResetLogo').onclick = function(){
+  PENDING_LOGO = '__RESET__';
+  el('logoPreview').src = DEFAULT_LOGO_URL;
+  toast('Logo akan dikembalikan ke default setelah disimpan');
+};
+
 el('btnSaveSettings').onclick = async function(){
-  const payload = { APP_NAME:el('sAppName').value, APP_SUBTITLE:el('sSubtitle').value, PERIODE:el('sPeriode').value, AUTO_REFRESH:el('sRefresh').value,
+  const payload = {
+    APP_NAME:el('sAppName').value, APP_SUBTITLE:el('sSubtitle').value,
+    PERIODE:el('sPeriode').value, AUTO_REFRESH:el('sRefresh').value,
     SIGN1_NAME:el('sSign1Name').value, SIGN1_ROLE:el('sSign1Role').value,
     SIGN2_NAME:el('sSign2Name').value, SIGN2_ROLE:el('sSign2Role').value,
-    SIGN3_NAME:el('sSign3Name').value, SIGN3_ROLE:el('sSign3Role').value };
+    SIGN3_NAME:el('sSign3Name').value, SIGN3_ROLE:el('sSign3Role').value,
+    TIME_SUBUH:el('sTimeSubuh').value, TIME_DHUHUR:el('sTimeDhuhur').value,
+    TIME_ASHAR:el('sTimeAshar').value, TIME_MAGHRIB:el('sTimeMaghrib').value,
+    TIME_ISYA:el('sTimeIsya').value
+  };
+  if(PENDING_LOGO === '__RESET__'){ payload.APP_LOGO = ''; }
+  else if(PENDING_LOGO){ payload.APP_LOGO = PENDING_LOGO; }
   el('btnSaveSettings').textContent='Menyimpan...'; el('btnSaveSettings').disabled=true;
   const r = await call('updatePengaturan', payload);
   el('btnSaveSettings').textContent='💾 Simpan Pengaturan'; el('btnSaveSettings').disabled=false;
-  if(r && r.success){ toast(r.message); await loadAll(true); } else { toast((r && r.message)||'Gagal','err'); }
+  if(r && r.success){ toast(r.message); PENDING_LOGO = null; await loadAll(true); }
+  else { toast((r && r.message)||'Gagal','err'); }
 };
 
 /* ---------- Confirm helper ---------- */

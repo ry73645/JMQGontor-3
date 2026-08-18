@@ -20,7 +20,11 @@ Membangun Web App **BJPJMQ** (Buat Jadwal Petugas Jam'iyyatul Qurra') berbasis *
 ## What's Implemented (Jan 2026)
 - Backend `Code.gs` lengkap: `doGet`, `getInitialData`, CRUD Petugas/Jadwal/Jenis Tugas, `updatePengaturan`, `rollingJadwal`, `validateJadwal`, `checkConflict`, `writeLog`, `initializeSpreadsheet`, `createRequiredSheets`, `LockService` untuk semua write.
 - Frontend `Index.html`: 9 halaman (Dashboard, Jadwal matrix, Kalender Bulanan, Petugas, Rolling, Jenis Tugas, Arsip Periode, Log, Pengaturan), modal jadwal/petugas/jenis/snapshot/confirm, toast, loading, responsive drawer sidebar, sticky headers, highlight cells, print CSS, WhatsApp share, jam realtime, auto-refresh 30 detik yang tidak mengganggu modal terbuka.
-- **Iterasi 3 (fitur baru)**:
+- **Iterasi 4 (fitur baru)**:
+  - **Upload Logo Kustom**: File input di Pengaturan → canvas resize ke max 200x200 JPEG progresif hingga <30KB → simpan sebagai `APP_LOGO` di PENGATURAN. `applyLogoFromSetting()` set src sidebar + PDF. Tombol Reset ke default Gontor.
+  - **Petugas Hari Ini di Dashboard**: `renderTodaySlots()` render 5 kartu (Subuh–Isya') dengan grup petugas per jenis tugas, highlight gold untuk item highlight, empty state, status realtime.
+  - **Cahaya Notifikasi Sholat**: 5 setting waktu (`TIME_SUBUH`, `TIME_DHUHUR`, ...). `updateSlotStatus()` (interval 30s) bandingkan jam sekarang vs target; class ditambahkan: `done` (>60m lalu), `current` (sedang berlangsung, +<60m), `imminent` (0–10m, glow terang cepat), `soon` (11–30m, glow kuning lembut). Ada countdown text.
+- **Iterasi 3**:
   - **Restore Arsip (♻ Pulihkan)**: `restoreArsip({ID, autoSnapshot})` — replace JADWAL sheet dengan snapshot arsip, otomatis membuat snapshot cadangan sebelumnya.
   - **PDF Cantik**: Template `#pdfTemplate` dengan kop logo Gontor + judul emas + tabel jadwal dengan highlight kuning + blok tanda tangan 3 pengurus (nama & jabatan configurable di Pengaturan). CSS `@media print` khusus.
   - **Notifikasi WhatsApp**: Halaman baru `notifikasi` — pilih hari, template pesan editable dengan placeholder `{NAMA} {HARI} {TANGGAL} {WAKTU} {JENIS_TUGAS}`, per petugas tampil tombol **📱 WA** (buka wa.me link) + **📋 Salin**. Kolom NO_WA ditambahkan ke sheet PETUGAS (backward-compat via header-extension). Tombol **Salin Semua** untuk broadcast.

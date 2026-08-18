@@ -76,6 +76,13 @@ Buka URL Web App di browser. Aplikasi akan otomatis:
 
 ## 🎯 Cara Menggunakan BJPJMQ
 
+### Personalisasi Profil (⚙️ Pengaturan)
+- **Logo Aplikasi**: klik **📤 Ganti Logo**, pilih PNG/JPG/WebP. Sistem otomatis mengecilkan ke 200px dan JPEG < 30 KB agar muat di cell Spreadsheet. Klik **↺ Default** untuk kembali ke logo Gontor.
+- **Waktu Sholat**: isi jam Subuh–Isya' agar dashboard bisa memunculkan **cahaya notifikasi** (kartu berkedip kuning saat < 30 menit, dan menyala terang < 10 menit menuju sholat).
+
+### Dashboard "Petugas Hari Ini"
+Paling atas menampilkan 5 kartu (Subuh → Dhuhur → Ashar → Maghrib → Isya') berisi seluruh petugas per jenis tugas untuk hari ini beserta status realtime (Akan datang / Mendekati / ⚡ Segera / Sekarang / Selesai) dengan countdown menit.
+
 ### Menambah Petugas
 1. Klik menu **👤 Petugas** di sidebar
 2. Klik **+ Tambah Petugas**
