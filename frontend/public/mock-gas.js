@@ -70,7 +70,8 @@
     ];
 
     const log = [{ID:'L001',TIMESTAMP:t,USER:'preview@local',ACTION:'INIT',DESCRIPTION:'Preview data awal dimuat'}];
-    const d = { petugas, jadwal, jenisTugas, pengaturan, log };
+    const arsip = [];
+    const d = { petugas, jadwal, jenisTugas, pengaturan, log, arsip };
     save(d);
     return d;
   }
@@ -215,6 +216,48 @@
 
     getLogAktivitas: function(){
       const d = load(); return ok(d.log.slice(-500).reverse());
+    },
+
+    reorderJenisTugas: function(p){
+      const d = load();
+      (p.orderedIds||[]).forEach(function(id, idx){
+        const jt = d.jenisTugas.find(x=>String(x.ID)===String(id));
+        if(jt){ jt.URUTAN = idx+1; jt.UPDATED_AT = now(); }
+      });
+      writeLog(d,'REORDER_JENIS','Urutan jenis tugas diperbarui'); save(d);
+      return ok(null,'Urutan diperbarui');
+    },
+
+    getArsip: function(){
+      const d = load(); d.arsip = d.arsip || [];
+      const light = d.arsip.slice().reverse().map(function(a){
+        return { ID:a.ID, PERIODE:a.PERIODE, TIMESTAMP:a.TIMESTAMP, JUMLAH_JADWAL:a.JUMLAH_JADWAL, DESKRIPSI:a.DESKRIPSI };
+      });
+      return ok(light);
+    },
+    snapshotPeriode: function(p){
+      const d = load(); d.arsip = d.arsip || [];
+      const periode = (p && p.PERIODE||'').trim(); if(!periode) return fail('Periode wajib diisi');
+      const jadwal = d.jadwal.filter(j=>j.STATUS==='Aktif');
+      const id = nextId('AR', d.arsip);
+      d.arsip.push({ID:id, PERIODE:periode, TIMESTAMP:now(), JUMLAH_JADWAL:jadwal.length, DESKRIPSI:(p.DESKRIPSI||''), DATA:{jadwal:jadwal, jenisTugas:d.jenisTugas}});
+      writeLog(d,'SNAPSHOT_ARSIP','Arsip periode: '+periode+' ('+jadwal.length+' jadwal)'); save(d);
+      return ok({ID:id},'Snapshot periode disimpan');
+    },
+    getArsipDetail: function(p){
+      const d = load(); d.arsip = d.arsip || [];
+      const a = d.arsip.find(x=>String(x.ID)===String(p.ID));
+      if(!a) return fail('Arsip tidak ditemukan');
+      return ok({ID:a.ID, PERIODE:a.PERIODE, TIMESTAMP:a.TIMESTAMP, JUMLAH_JADWAL:a.JUMLAH_JADWAL, DESKRIPSI:a.DESKRIPSI, jadwal:(a.DATA&&a.DATA.jadwal)||[], jenisTugas:(a.DATA&&a.DATA.jenisTugas)||[]});
+    },
+    deleteArsip: function(p){
+      const d = load(); d.arsip = d.arsip || [];
+      const idx = d.arsip.findIndex(x=>String(x.ID)===String(p.ID));
+      if(idx<0) return fail('Arsip tidak ditemukan');
+      const periode = d.arsip[idx].PERIODE;
+      d.arsip.splice(idx,1);
+      writeLog(d,'DELETE_ARSIP','Menghapus arsip: '+periode); save(d);
+      return ok(null,'Arsip dihapus');
     }
   };
 

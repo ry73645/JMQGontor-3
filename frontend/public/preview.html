@@ -212,6 +212,48 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
   #print-header p{font-size:13px;color:#333}
 }
 #print-header{display:none}
+
+/* ===== Drag reorder (Jenis Tugas) ===== */
+.drag-row{cursor:grab}
+.drag-row.dragging{opacity:.4;cursor:grabbing;background:rgba(244,197,66,.08)}
+.drag-row.drag-over td{border-top:2px solid var(--gold) !important}
+.drag-handle{display:inline-block;color:rgba(255,255,255,.4);cursor:grab;font-size:16px;user-select:none;padding-right:8px}
+.drag-handle:hover{color:var(--gold)}
+
+/* ===== Calendar ===== */
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.cal-nav{display:flex;gap:8px;align-items:center}
+.cal-nav strong{font-size:17px;color:var(--gold);min-width:170px;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal-dow{padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em}
+.cal-cell{background:rgba(0,0,0,.2);border:1px solid var(--glass-border);border-radius:10px;padding:8px;min-height:110px;transition:.2s;display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.cal-cell:hover{background:rgba(244,197,66,.08);border-color:var(--gold)}
+.cal-cell.other{opacity:.35}
+.cal-cell.today{border-color:var(--gold);background:rgba(244,197,66,.14)}
+.cal-cell .d{font-weight:800;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.cal-cell .d small{font-size:9.5px;font-weight:600;color:var(--light-yellow);text-transform:uppercase;letter-spacing:.06em}
+.cal-cell .items{display:flex;flex-direction:column;gap:2px;overflow:hidden;font-size:11px}
+.cal-cell .items span{padding:2px 5px;border-radius:5px;background:rgba(19,160,91,.28);color:#c8f0d9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-cell .items span.hl{background:linear-gradient(135deg,var(--gold),var(--light-yellow));color:#0a2416;font-weight:700}
+.cal-cell .more{font-size:10px;color:rgba(255,255,255,.55);margin-top:2px}
+@media (max-width: 720px){
+  .cal-cell{min-height:80px;padding:5px;font-size:10.5px}
+  .cal-cell .items{display:none}
+  .cal-cell .d{font-size:12px}
+}
+
+/* Arsip */
+.arsip-card{padding:14px;border-radius:12px;background:var(--glass-strong);border:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.arsip-card .meta{font-size:12.5px;color:rgba(255,255,255,.7)}
+.arsip-card h4{font-size:15px;color:var(--gold);margin-bottom:3px}
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.compare-col h4{margin-bottom:10px;color:var(--gold)}
+.compare-col table{width:100%;font-size:12px;border-collapse:collapse}
+.compare-col table td{padding:6px;border-bottom:1px solid rgba(255,255,255,.08)}
+.diff-added{color:#8fe4b9;background:rgba(19,160,91,.12)}
+.diff-removed{color:#ff9d9d;background:rgba(255,107,107,.12);text-decoration:line-through}
+.diff-changed{color:var(--gold);background:rgba(244,197,66,.1)}
+@media (max-width: 720px){ .compare-wrap{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -229,9 +271,11 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
     <ul class="nav" id="nav">
       <li><a href="#" data-page="dashboard" class="active"><span class="nav-ico">🏠</span> Dashboard</a></li>
       <li><a href="#" data-page="jadwal"><span class="nav-ico">📅</span> Jadwal</a></li>
+      <li><a href="#" data-page="kalender"><span class="nav-ico">🗓️</span> Kalender Bulanan</a></li>
       <li><a href="#" data-page="petugas"><span class="nav-ico">👤</span> Petugas</a></li>
       <li><a href="#" data-page="rolling"><span class="nav-ico">🔄</span> Rolling</a></li>
       <li><a href="#" data-page="jenis"><span class="nav-ico">📋</span> Jenis Tugas</a></li>
+      <li><a href="#" data-page="arsip"><span class="nav-ico">📦</span> Arsip Periode</a></li>
       <li><a href="#" data-page="log"><span class="nav-ico">📊</span> Log Aktivitas</a></li>
       <li><a href="#" data-page="settings"><span class="nav-ico">⚙️</span> Pengaturan</a></li>
     </ul>
@@ -302,6 +346,7 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
           <h2>Jadwal Petugas</h2>
           <div class="toolbar no-print">
             <button class="btn btn-ghost btn-sm" id="btnPrint" data-testid="print-btn">🖨 Cetak</button>
+            <button class="btn btn-ghost btn-sm" id="btnCSV" data-testid="csv-btn">📥 CSV</button>
             <button class="btn btn-ghost btn-sm" id="btnWA" data-testid="wa-btn">📱 Share WA</button>
             <button class="btn btn-primary btn-sm" id="btnAddJadwal" data-testid="add-jadwal-btn">＋ Tambah Jadwal</button>
           </div>
@@ -368,6 +413,51 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
           <button class="btn btn-primary" id="btnRolling" data-testid="rolling-btn">🔄 Rolling</button>
           <button class="btn btn-ghost" id="btnRollingRefresh">Muat Ulang</button>
         </div>
+      </div>
+    </div>
+
+    <!-- =========== KALENDER BULANAN =========== -->
+    <div class="page" id="page-kalender">
+      <div class="card">
+        <div class="cal-head">
+          <div class="section-head" style="margin:0"><h2>Kalender Bulanan</h2></div>
+          <div class="cal-nav">
+            <button class="btn btn-ghost btn-sm" id="calPrev" data-testid="cal-prev">◀</button>
+            <strong id="calLabel">-</strong>
+            <button class="btn btn-ghost btn-sm" id="calNext" data-testid="cal-next">▶</button>
+            <button class="btn btn-ghost btn-sm" id="calToday" data-testid="cal-today">Hari Ini</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calDow"></div>
+        <div class="cal-grid" id="calGrid" style="margin-top:6px"></div>
+        <p style="margin-top:12px;font-size:11.5px;color:rgba(255,255,255,.55)">Klik tanggal untuk lihat detail. Data mengikuti hari (Ahad–Sabtu) dari sheet JADWAL.</p>
+      </div>
+    </div>
+
+    <!-- =========== ARSIP PERIODE =========== -->
+    <div class="page" id="page-arsip">
+      <div class="card">
+        <div class="section-head">
+          <h2>Arsip Periode</h2>
+          <div class="toolbar">
+            <button class="btn btn-primary btn-sm" id="btnSnapshot" data-testid="snapshot-btn">📸 Simpan Snapshot</button>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,.7);margin-bottom:14px;font-size:13px">Simpan salinan jadwal aktif saat ini agar bisa dibandingkan di lain waktu.</p>
+        <div id="arsipList"></div>
+      </div>
+      <div class="card" id="arsipCompare" style="margin-top:14px;display:none">
+        <div class="section-head">
+          <h2>Bandingkan Snapshot</h2>
+          <div class="toolbar">
+            <button class="btn btn-ghost btn-sm" id="btnCloseCompare">Tutup</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div><label>Snapshot Kiri</label><select id="cmpLeft"></select></div>
+          <div><label>Snapshot Kanan</label><select id="cmpRight"></select></div>
+        </div>
+        <div id="cmpResult" class="compare-wrap"></div>
       </div>
     </div>
 
@@ -465,6 +555,22 @@ tr.time-row td:first-child{background:rgba(244,197,66,.18)}
   </div>
 </div>
 
+<!-- ============ MODAL: SNAPSHOT ============ -->
+<div class="modal-back" id="modalSnapshot">
+  <div class="modal" style="max-width:460px">
+    <h3>Simpan Snapshot Periode</h3>
+    <p class="sub">Ambil salinan jadwal aktif saat ini untuk arsip.</p>
+    <div class="form-grid">
+      <div class="full"><label>Nama Periode</label><input id="snPeriode" placeholder="Contoh: 17-23 Agustus 2026" data-testid="snap-periode"/></div>
+      <div class="full"><label>Deskripsi (opsional)</label><textarea id="snDeskripsi" rows="2"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>Batal</button>
+      <button class="btn btn-primary" id="snSave" data-testid="snap-save">📸 Simpan</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ MODAL: CONFIRM ============ -->
 <div class="modal-back" id="modalConfirm">
   <div class="modal" style="max-width:420px">
@@ -541,7 +647,7 @@ document.querySelectorAll('#nav a').forEach(function(a){
     STATE.currentPage = p;
     document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
     el('page-'+p).classList.add('active');
-    const titles = {dashboard:['Dashboard','Ringkasan aktivitas hari ini'],jadwal:['Jadwal Petugas','Matrix jadwal mingguan'],petugas:['Data Petugas','Kelola daftar petugas'],rolling:['Rolling Jadwal','Rotasi petugas otomatis'],jenis:['Jenis Tugas','Kelola jenis tugas'],log:['Log Aktivitas','Riwayat perubahan'],settings:['Pengaturan','Konfigurasi aplikasi']};
+    const titles = {dashboard:['Dashboard','Ringkasan aktivitas hari ini'],jadwal:['Jadwal Petugas','Matrix jadwal mingguan'],kalender:['Kalender Bulanan','Jadwal per tanggal'],petugas:['Data Petugas','Kelola daftar petugas'],rolling:['Rolling Jadwal','Rotasi petugas otomatis'],jenis:['Jenis Tugas','Kelola jenis tugas'],arsip:['Arsip Periode','Snapshot & bandingkan jadwal'],log:['Log Aktivitas','Riwayat perubahan'],settings:['Pengaturan','Konfigurasi aplikasi']};
     el('pageTitle').textContent = titles[p][0]; el('pageSub').textContent = titles[p][1];
     el('sidebar').classList.remove('open');
     if(p==='petugas') renderPetugas();
@@ -550,6 +656,8 @@ document.querySelectorAll('#nav a').forEach(function(a){
     if(p==='rolling') renderRolling();
     if(p==='log') renderLog();
     if(p==='settings') renderSettings();
+    if(p==='kalender') renderCalendar();
+    if(p==='arsip') loadArsip();
   });
 });
 el('hamburger').onclick = function(){ el('sidebar').classList.toggle('open'); };
@@ -769,11 +877,38 @@ function renderJenis(){
   const body = el('jenisBody');
   if(!list.length){ body.innerHTML='<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,.5);padding:24px">Belum ada jenis tugas</td></tr>'; return; }
   body.innerHTML = list.map(function(j){
-    return '<tr><td><strong>'+escapeHtml(String(j.URUTAN||0))+'</strong></td><td>'+escapeHtml(j.NAMA_TUGAS)+'</td>'+
+    return '<tr class="drag-row" draggable="true" data-id="'+escapeHtml(j.ID)+'">'+
+      '<td><span class="drag-handle" title="Tarik untuk mengubah urutan">⋮⋮</span><strong>'+escapeHtml(String(j.URUTAN||0))+'</strong></td>'+
+      '<td>'+escapeHtml(j.NAMA_TUGAS)+'</td>'+
       '<td><span class="badge '+(j.STATUS==='Aktif'?'aktif':'nonaktif')+'">'+escapeHtml(j.STATUS)+'</span></td>'+
       '<td><button class="btn btn-ghost btn-sm" onclick="editJenis(\''+escapeHtml(j.ID)+'\')">Edit</button> '+
       '<button class="btn btn-danger btn-sm" onclick="deleteJenisReq(\''+escapeHtml(j.ID)+'\')">Hapus</button></td></tr>';
   }).join('');
+  attachJenisDrag();
+}
+
+let dragSrc = null;
+function attachJenisDrag(){
+  const rows = document.querySelectorAll('#jenisBody tr.drag-row');
+  rows.forEach(function(r){
+    r.addEventListener('dragstart', function(e){ dragSrc = r; r.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain', r.dataset.id); }catch(x){} });
+    r.addEventListener('dragend', function(){ r.classList.remove('dragging'); rows.forEach(function(x){x.classList.remove('drag-over')}); });
+    r.addEventListener('dragover', function(e){ e.preventDefault(); if(dragSrc && dragSrc!==r){ r.classList.add('drag-over'); } });
+    r.addEventListener('dragleave', function(){ r.classList.remove('drag-over'); });
+    r.addEventListener('drop', async function(e){
+      e.preventDefault(); r.classList.remove('drag-over');
+      if(!dragSrc || dragSrc===r) return;
+      const body = el('jenisBody');
+      const srcRect = dragSrc.getBoundingClientRect();
+      const tgtRect = r.getBoundingClientRect();
+      if(srcRect.top < tgtRect.top){ body.insertBefore(dragSrc, r.nextSibling); }
+      else { body.insertBefore(dragSrc, r); }
+      const orderedIds = Array.from(body.querySelectorAll('tr.drag-row')).map(function(x){return x.dataset.id});
+      const rr = await call('reorderJenisTugas', {orderedIds:orderedIds});
+      if(rr && rr.success){ toast('Urutan diperbarui'); await loadAll(true); }
+      else { toast((rr && rr.message)||'Gagal memperbarui urutan','err'); renderJenis(); }
+    });
+  });
 }
 el('btnAddJenis').onclick = function(){ el('mtTitle').textContent='Tambah Jenis Tugas'; el('mtNama').value=''; el('mtUrutan').value=(STATE.jenisTugas||[]).length+1; el('mtStatus').value='Aktif'; el('mtDelete').style.display='none'; el('mtSave').dataset.id=''; openModal('modalJenis'); };
 window.editJenis = function(id){
@@ -947,6 +1082,199 @@ el('btnWA').onclick = function(){
 /* ---------- Refresh ---------- */
 el('refreshBtn').onclick = function(){ loadAll(); };
 setInterval(function(){ if(!STATE.modalOpen) loadAll(true); }, 30000);
+
+/* ---------- Export CSV ---------- */
+el('btnCSV').onclick = function(){
+  const rows = [['Hari','Waktu','Jenis Tugas','Petugas','Highlight','Keterangan','Status']];
+  (STATE.jadwal||[]).forEach(function(j){
+    rows.push([j.HARI||'', j.WAKTU||'', j.JENIS_TUGAS||'', j.PETUGAS_NAMA||'', String(j.HIGHLIGHT).toUpperCase()==='TRUE'?'YA':'', j.KETERANGAN||'', j.STATUS||'']);
+  });
+  const csv = rows.map(function(r){
+    return r.map(function(c){ const s=String(c==null?'':c); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',');
+  }).join('\n');
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const periode = (getSetting('PERIODE','2026')||'').replace(/[^\w\-]+/g,'_');
+  a.href = url; a.download = 'BJPJMQ_Jadwal_'+periode+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+  toast('CSV berhasil diunduh');
+};
+
+/* ---------- KALENDER BULANAN ---------- */
+const CAL = { year: new Date().getFullYear(), month: new Date().getMonth() };
+function renderCalendar(){
+  const dowNames = ['Ahad','Senin','Selasa','Rabu','Kamis',"Jum'at",'Sabtu'];
+  const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  el('calLabel').textContent = bulanId[CAL.month] + ' ' + CAL.year;
+  el('calDow').innerHTML = dowNames.map(function(d){return '<div class="cal-dow">'+d+'</div>'}).join('');
+
+  const first = new Date(CAL.year, CAL.month, 1);
+  const startDow = first.getDay(); // 0=Sunday(Ahad)
+  const daysInMonth = new Date(CAL.year, CAL.month+1, 0).getDate();
+  const prevDays = new Date(CAL.year, CAL.month, 0).getDate();
+
+  const today = new Date();
+  const isTodayMonth = today.getFullYear()===CAL.year && today.getMonth()===CAL.month;
+
+  const jenisSorted = (STATE.jenisTugas||[]).filter(function(j){return j.STATUS==='Aktif'}).sort(function(a,b){return (a.URUTAN||0)-(b.URUTAN||0)});
+  const cells = [];
+  // previous month tail
+  for(let i=startDow-1; i>=0; i--){
+    cells.push({date: prevDays-i, other:true, dow:(startDow-1-i)});
+  }
+  // current month
+  for(let d=1; d<=daysInMonth; d++){
+    const dow = new Date(CAL.year, CAL.month, d).getDay();
+    cells.push({date:d, other:false, dow:dow, today: isTodayMonth && d===today.getDate()});
+  }
+  // fill next month
+  while(cells.length % 7 !== 0){ cells.push({date: cells.length - startDow - daysInMonth + 1, other:true}); }
+
+  const html = cells.map(function(c){
+    if(c.other){ return '<div class="cal-cell other"><div class="d">'+c.date+'</div></div>'; }
+    const hariNama = dowNames[c.dow];
+    // find all jadwal for this dow
+    const items = (STATE.jadwal||[]).filter(function(j){ return j.HARI===hariNama && j.STATUS==='Aktif'; });
+    // group by waktu-jenis for display; take up to 4
+    items.sort(function(a,b){
+      const wa = STATE.waktuList.indexOf(a.WAKTU), wb = STATE.waktuList.indexOf(b.WAKTU);
+      if(wa!==wb) return wa-wb;
+      const ja = jenisSorted.findIndex(function(x){return x.NAMA_TUGAS===a.JENIS_TUGAS});
+      const jb = jenisSorted.findIndex(function(x){return x.NAMA_TUGAS===b.JENIS_TUGAS});
+      return ja-jb;
+    });
+    const shown = items.slice(0,3);
+    const rest = items.length - shown.length;
+    return '<div class="cal-cell '+(c.today?'today':'')+'" data-date="'+c.date+'" data-dow="'+c.dow+'">'+
+      '<div class="d">'+c.date+' <small>'+hariNama+'</small></div>'+
+      '<div class="items">'+ shown.map(function(x){
+        const hl = String(x.HIGHLIGHT).toUpperCase()==='TRUE';
+        return '<span class="'+(hl?'hl':'')+'" title="'+escapeHtml(x.WAKTU+' '+x.JENIS_TUGAS+': '+x.PETUGAS_NAMA)+'">'+escapeHtml(x.WAKTU.charAt(0)+' · '+x.PETUGAS_NAMA)+'</span>';
+      }).join('') + (rest>0?'<div class="more">+'+rest+' lainnya</div>':'') +
+      '</div></div>';
+  }).join('');
+  el('calGrid').innerHTML = html;
+
+  el('calGrid').querySelectorAll('.cal-cell[data-date]').forEach(function(cell){
+    cell.addEventListener('click', function(){
+      const dow = parseInt(cell.dataset.dow,10);
+      STATE.filters = {hari: dowNames[dow], waktu:'', jenis:''};
+      // switch to jadwal page
+      document.querySelector('a[data-page="jadwal"]').click();
+      el('fHari').value = dowNames[dow];
+    });
+  });
+}
+el('calPrev').onclick = function(){ CAL.month--; if(CAL.month<0){CAL.month=11;CAL.year--} renderCalendar(); };
+el('calNext').onclick = function(){ CAL.month++; if(CAL.month>11){CAL.month=0;CAL.year++} renderCalendar(); };
+el('calToday').onclick = function(){ CAL.year=new Date().getFullYear(); CAL.month=new Date().getMonth(); renderCalendar(); };
+
+/* ---------- ARSIP PERIODE ---------- */
+let ARSIP_LIST = [];
+async function loadArsip(){
+  showLoading(true);
+  const r = await call('getArsip');
+  showLoading(false);
+  ARSIP_LIST = (r && r.success && Array.isArray(r.data)) ? r.data : [];
+  renderArsipList();
+}
+function renderArsipList(){
+  const wrap = el('arsipList');
+  if(!ARSIP_LIST.length){ wrap.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.5);padding:24px">Belum ada snapshot. Klik "📸 Simpan Snapshot" untuk mengarsipkan jadwal saat ini.</p>'; return; }
+  wrap.innerHTML = ARSIP_LIST.map(function(a){
+    return '<div class="arsip-card">'+
+      '<div><h4>📦 '+escapeHtml(a.PERIODE)+'</h4>'+
+      '<div class="meta">'+escapeHtml(a.TIMESTAMP)+' · '+escapeHtml(String(a.JUMLAH_JADWAL||0))+' jadwal'+(a.DESKRIPSI?' · '+escapeHtml(a.DESKRIPSI):'')+'</div></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="btn btn-ghost btn-sm" onclick="viewArsip(\''+escapeHtml(a.ID)+'\')">👁 Lihat</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteArsipReq(\''+escapeHtml(a.ID)+'\')">Hapus</button>'+
+      '</div></div>';
+  }).join('') +
+  '<div style="margin-top:10px"><button class="btn btn-primary btn-sm" id="btnOpenCompare">⚖ Bandingkan 2 Snapshot</button></div>';
+  const cmp = el('btnOpenCompare');
+  if(cmp) cmp.onclick = openCompare;
+}
+
+el('btnSnapshot').onclick = function(){
+  const now = new Date();
+  const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][now.getMonth()];
+  el('snPeriode').value = getSetting('PERIODE', bulan+' '+now.getFullYear());
+  el('snDeskripsi').value = '';
+  openModal('modalSnapshot');
+};
+el('snSave').onclick = async function(){
+  const periode = el('snPeriode').value.trim(); if(!periode){ toast('Periode wajib diisi','err'); return; }
+  el('snSave').textContent='Menyimpan...'; el('snSave').disabled=true;
+  const r = await call('snapshotPeriode', { PERIODE: periode, DESKRIPSI: el('snDeskripsi').value });
+  el('snSave').textContent='📸 Simpan'; el('snSave').disabled=false;
+  if(r && r.success){ toast(r.message); closeModal('modalSnapshot'); await loadArsip(); }
+  else { toast((r && r.message)||'Gagal','err'); }
+};
+
+window.viewArsip = async function(id){
+  showLoading(true);
+  const r = await call('getArsipDetail', {ID:id});
+  showLoading(false);
+  if(!r || !r.success){ toast((r && r.message)||'Gagal','err'); return; }
+  const data = r.data;
+  const win = window.open('','_blank');
+  const rows = (data.jadwal||[]).map(function(j){
+    return '<tr><td>'+j.HARI+'</td><td>'+j.WAKTU+'</td><td>'+j.JENIS_TUGAS+'</td><td>'+j.PETUGAS_NAMA+'</td></tr>';
+  }).join('');
+  if(win){
+    win.document.write('<html><head><title>Arsip '+escapeHtml(data.PERIODE)+'</title><style>body{font-family:Inter,sans-serif;padding:24px;background:#063B2A;color:#fff}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #087A45;text-align:left}th{background:#04241a;color:#F4C542}h1{color:#F4C542}</style></head><body><h1>📦 '+escapeHtml(data.PERIODE)+'</h1><p>Timestamp: '+escapeHtml(data.TIMESTAMP)+' · Total: '+data.JUMLAH_JADWAL+' jadwal</p><table><thead><tr><th>Hari</th><th>Waktu</th><th>Jenis Tugas</th><th>Petugas</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+    win.document.close();
+  }
+};
+
+window.deleteArsipReq = function(id){
+  showConfirm('Hapus Arsip','Yakin ingin menghapus snapshot ini?', async function(){
+    const r = await call('deleteArsip',{ID:id});
+    if(r && r.success){ toast(r.message); await loadArsip(); } else { toast((r && r.message)||'Gagal','err'); }
+  });
+};
+
+async function openCompare(){
+  if(ARSIP_LIST.length < 2){ toast('Butuh minimal 2 snapshot untuk membandingkan','err'); return; }
+  el('arsipCompare').style.display='';
+  const opts = ARSIP_LIST.map(function(a){return '<option value="'+escapeHtml(a.ID)+'">'+escapeHtml(a.PERIODE)+' ('+escapeHtml(a.TIMESTAMP)+')</option>'}).join('');
+  el('cmpLeft').innerHTML = opts; el('cmpRight').innerHTML = opts;
+  el('cmpLeft').selectedIndex = 1; el('cmpRight').selectedIndex = 0;
+  ['cmpLeft','cmpRight'].forEach(function(id){ el(id).onchange = runCompare; });
+  await runCompare();
+}
+el('btnCloseCompare').onclick = function(){ el('arsipCompare').style.display='none'; };
+
+async function runCompare(){
+  const idL = el('cmpLeft').value, idR = el('cmpRight').value;
+  showLoading(true);
+  const [rL, rR] = await Promise.all([call('getArsipDetail',{ID:idL}), call('getArsipDetail',{ID:idR})]);
+  showLoading(false);
+  if(!rL.success || !rR.success){ toast('Gagal memuat data','err'); return; }
+  const L = rL.data, R = rR.data;
+  const key = j => j.HARI+'|'+j.WAKTU+'|'+j.JENIS_TUGAS;
+  const mapL = {}; (L.jadwal||[]).forEach(function(j){ mapL[key(j)] = j.PETUGAS_NAMA; });
+  const mapR = {}; (R.jadwal||[]).forEach(function(j){ mapR[key(j)] = j.PETUGAS_NAMA; });
+  const allKeys = Object.keys(Object.assign({}, mapL, mapR)).sort();
+
+  function renderCol(map, other, title){
+    let html = '<div class="compare-col"><h4>'+escapeHtml(title)+'</h4><table><thead><tr><th>Hari</th><th>Waktu</th><th>Jenis</th><th>Petugas</th></tr></thead><tbody>';
+    allKeys.forEach(function(k){
+      const parts = k.split('|');
+      const v = map[k]; const o = other[k];
+      let cls = '';
+      if(v && !o) cls = 'diff-added';
+      else if(!v && o) cls = 'diff-removed';
+      else if(v && o && v!==o) cls = 'diff-changed';
+      html += '<tr class="'+cls+'"><td>'+parts[0]+'</td><td>'+parts[1]+'</td><td>'+parts[2]+'</td><td>'+(v||o||'-')+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+  el('cmpResult').innerHTML = renderCol(mapL, mapR, L.PERIODE) + renderCol(mapR, mapL, R.PERIODE);
+}
 
 /* ---------- Boot ---------- */
 loadAll();

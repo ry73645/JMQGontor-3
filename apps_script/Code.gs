@@ -20,7 +20,8 @@ const SHEETS = {
   JADWAL: 'JADWAL',
   JENIS_TUGAS: 'JENIS_TUGAS',
   PENGATURAN: 'PENGATURAN',
-  LOG_AKTIVITAS: 'LOG_AKTIVITAS'
+  LOG_AKTIVITAS: 'LOG_AKTIVITAS',
+  ARSIP: 'ARSIP'
 };
 
 const HEADERS = {
@@ -28,7 +29,8 @@ const HEADERS = {
   JADWAL: ['ID', 'HARI', 'WAKTU', 'JENIS_TUGAS', 'PETUGAS_ID', 'PETUGAS_NAMA', 'STATUS', 'HIGHLIGHT', 'KETERANGAN', 'CREATED_AT', 'UPDATED_AT'],
   JENIS_TUGAS: ['ID', 'NAMA_TUGAS', 'URUTAN', 'STATUS', 'CREATED_AT', 'UPDATED_AT'],
   PENGATURAN: ['KEY', 'VALUE'],
-  LOG_AKTIVITAS: ['ID', 'TIMESTAMP', 'USER', 'ACTION', 'DESCRIPTION']
+  LOG_AKTIVITAS: ['ID', 'TIMESTAMP', 'USER', 'ACTION', 'DESCRIPTION'],
+  ARSIP: ['ID', 'PERIODE', 'TIMESTAMP', 'JUMLAH_JADWAL', 'DESKRIPSI', 'DATA_JSON']
 };
 
 const HARI_LIST = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu'];
@@ -594,4 +596,93 @@ function getLogAktivitas() {
     const data = sheetToObjects(getSheet(SHEETS.LOG_AKTIVITAS)).slice(-500).reverse();
     return respondOk(data);
   } catch (err) { return handleError('getLogAktivitas', err); }
+}
+
+// ============ REORDER JENIS TUGAS ============
+function reorderJenisTugas(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    // payload: { orderedIds: ['JT001','JT003',...] }
+    const sheet = getSheet(SHEETS.JENIS_TUGAS);
+    const last = sheet.getLastRow();
+    if (last < 2) return respondOk(null, 'Tidak ada data');
+    const now = getCurrentTimestamp();
+    const ids = payload.orderedIds || [];
+    ids.forEach(function (id, idx) {
+      const row = findRowById(sheet, id);
+      if (row > 0) {
+        sheet.getRange(row, 3).setValue(idx + 1);
+        sheet.getRange(row, 6).setValue(now);
+      }
+    });
+    writeLog('REORDER_JENIS', 'Urutan jenis tugas diperbarui');
+    return respondOk(null, 'Urutan berhasil diperbarui');
+  } catch (err) { return handleError('reorderJenisTugas', err); }
+  finally { try { lock.releaseLock(); } catch (e) {} }
+}
+
+// ============ ARSIP PERIODE ============
+function getArsip() {
+  try {
+    const data = sheetToObjects(getSheet(SHEETS.ARSIP)).reverse();
+    // Return without heavy DATA_JSON
+    const light = data.map(function (r) {
+      return { ID: r.ID, PERIODE: r.PERIODE, TIMESTAMP: r.TIMESTAMP,
+        JUMLAH_JADWAL: r.JUMLAH_JADWAL, DESKRIPSI: r.DESKRIPSI };
+    });
+    return respondOk(light);
+  } catch (err) { return handleError('getArsip', err); }
+}
+
+function snapshotPeriode(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const periode = sanitizeInput((payload && payload.PERIODE) || '');
+    if (!periode) return respondFail('Periode wajib diisi');
+    const deskripsi = sanitizeInput((payload && payload.DESKRIPSI) || '');
+    const jadwal = sheetToObjects(getSheet(SHEETS.JADWAL))
+      .filter(function (j) { return j.STATUS === 'Aktif'; });
+    const jenisTugas = sheetToObjects(getSheet(SHEETS.JENIS_TUGAS));
+    const snap = { jadwal: jadwal, jenisTugas: jenisTugas };
+    const sheet = getSheet(SHEETS.ARSIP);
+    const id = generateId('AR', sheet);
+    const now = getCurrentTimestamp();
+    sheet.appendRow([id, periode, now, jadwal.length, deskripsi, JSON.stringify(snap)]);
+    writeLog('SNAPSHOT_ARSIP', 'Arsip periode: ' + periode + ' (' + jadwal.length + ' jadwal)');
+    return respondOk({ ID: id }, 'Snapshot periode berhasil disimpan');
+  } catch (err) { return handleError('snapshotPeriode', err); }
+  finally { try { lock.releaseLock(); } catch (e) {} }
+}
+
+function getArsipDetail(payload) {
+  try {
+    const sheet = getSheet(SHEETS.ARSIP);
+    const row = findRowById(sheet, payload.ID);
+    if (row < 0) return respondFail('Arsip tidak ditemukan');
+    const vals = sheet.getRange(row, 1, 1, 6).getValues()[0];
+    let data = null;
+    try { data = JSON.parse(vals[5] || '{}'); } catch (e) { data = { jadwal: [], jenisTugas: [] }; }
+    return respondOk({
+      ID: vals[0], PERIODE: vals[1], TIMESTAMP: vals[2],
+      JUMLAH_JADWAL: vals[3], DESKRIPSI: vals[4],
+      jadwal: data.jadwal || [], jenisTugas: data.jenisTugas || []
+    });
+  } catch (err) { return handleError('getArsipDetail', err); }
+}
+
+function deleteArsip(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const sheet = getSheet(SHEETS.ARSIP);
+    const row = findRowById(sheet, payload.ID);
+    if (row < 0) return respondFail('Arsip tidak ditemukan');
+    const periode = sheet.getRange(row, 2).getValue();
+    sheet.deleteRow(row);
+    writeLog('DELETE_ARSIP', 'Menghapus arsip: ' + periode);
+    return respondOk(null, 'Arsip dihapus');
+  } catch (err) { return handleError('deleteArsip', err); }
+  finally { try { lock.releaseLock(); } catch (e) {} }
 }

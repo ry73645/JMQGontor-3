@@ -19,18 +19,22 @@ Membangun Web App **BJPJMQ** (Buat Jadwal Petugas Jam'iyyatul Qurra') berbasis *
 
 ## What's Implemented (Jan 2026)
 - Backend `Code.gs` lengkap: `doGet`, `getInitialData`, CRUD Petugas/Jadwal/Jenis Tugas, `updatePengaturan`, `rollingJadwal`, `validateJadwal`, `checkConflict`, `writeLog`, `initializeSpreadsheet`, `createRequiredSheets`, `LockService` untuk semua write.
-- Frontend `Index.html`: 7 halaman (Dashboard, Jadwal matrix, Petugas, Rolling, Jenis Tugas, Log, Pengaturan), modal jadwal/petugas/jenis/confirm, toast, loading, responsive drawer sidebar, sticky headers, highlight cells, print CSS, WhatsApp share, jam realtime, auto-refresh 30 detik yang tidak mengganggu modal terbuka.
-- Preview di Emergent via iframe + mock backend (`mock-gas.js`) yang mirror perilaku GAS, plus 16 sample petugas + jadwal isi penuh.
+- Frontend `Index.html`: 9 halaman (Dashboard, Jadwal matrix, Kalender Bulanan, Petugas, Rolling, Jenis Tugas, Arsip Periode, Log, Pengaturan), modal jadwal/petugas/jenis/snapshot/confirm, toast, loading, responsive drawer sidebar, sticky headers, highlight cells, print CSS, WhatsApp share, jam realtime, auto-refresh 30 detik yang tidak mengganggu modal terbuka.
+- **Iterasi 2 (fitur baru)**:
+  - **Export CSV**: Tombol 📥 CSV di halaman Jadwal, download client-side (Blob + BOM UTF-8) dengan nama `BJPJMQ_Jadwal_<PERIODE>.csv`.
+  - **Drag & Drop Reorder Jenis Tugas**: HTML5 native drag-drop pada baris tabel; backend `reorderJenisTugas({orderedIds})` batch update kolom URUTAN.
+  - **Kalender Bulanan**: Grid 7 kolom Ahad-Sabtu, navigasi prev/next bulan, tombol Hari Ini, cell menampilkan ringkasan 3 jadwal + "+N lainnya", klik cell auto-filter Jadwal ke hari terkait.
+  - **Arsip Periode**: Sheet baru `ARSIP` dengan kolom DATA_JSON (snapshot jadwal aktif + jenisTugas). Backend: `snapshotPeriode`, `getArsip`, `getArsipDetail`, `deleteArsip`. UI: list card, tombol lihat (jendela popup), bandingkan 2 snapshot dengan diff highlight (added/removed/changed).
+- Preview di Emergent via iframe + mock backend (`mock-gas.js`) yang mirror semua fungsi termasuk 4 fitur baru.
 - Logo Darussalam Gontor terpasang di sidebar.
 - Tutorial instalasi lengkap di `/app/INSTALASI_BJPJMQ.md`.
 
 ## Manual Verification (via screenshot)
-- Dashboard: stats + activity log OK
-- Jadwal matrix: highlight gold OK, sticky column OK
-- Modal Edit Jadwal: pre-fill data + toggle highlight OK
-- Petugas CRUD table: 16 petugas ter-render OK
-- Rolling page: dropdown terpopulate + petugas saat ini update OK
-- Log page: entries render OK
+- Dashboard, Jadwal matrix, Petugas CRUD, Rolling, Log — OK
+- Kalender bulan Agustus 2026: 4 tanggal highlighted (Mujawwadah Ahad/Rabu/Jum'at) — OK
+- Arsip: 2 snapshot berhasil dibuat, tombol Bandingkan aktif, view side-by-side muncul — OK
+- Jenis Tugas: drag handle ⋮⋮ terlihat, cursor grab
+- CSV button visible & functional (blob download)
 
 ## Backlog
 - P1: Drag & drop reorder di halaman Jenis Tugas
